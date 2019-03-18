@@ -1,0 +1,37 @@
+# Only trigger builds for master.
+trigger:
+  branches:
+    include:
+      - master
+
+# Trigger pull request builds against master.
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - master
+
+# Build specification
+jobs:
+  - job: VS2017
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+      - checkout: self
+        submodules: recursive
+      - script: |
+          echo Original cmake from Azure image
+          where cmake
+          cmake --version
+          echo Installing exact cmake version
+          pip install cmake==3.7.2
+        displayName: Install CMake
+      - script: |
+          echo Using cmake
+          where cmake
+          cmake --version
+          mkdir build
+          cd build
+          cmake -G "Visual Studio 15 2017 Win64" ..
+          cmake --build . --config Release
+        displayName: Build

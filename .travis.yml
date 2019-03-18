@@ -1,6 +1,12 @@
 language: cpp
 dist: trusty
 sudo: false
+branches:
+  except:
+    # These will all have an associated PR build, don't build twice...
+    - /^feat.*$/
+    - /^fix.*$/
+    - /^deps.*$/
 matrix:
   include:
     - os: linux
