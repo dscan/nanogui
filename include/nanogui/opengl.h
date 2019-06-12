@@ -17,10 +17,6 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 #if defined(NANOGUI_GLAD)
-    #if defined(NANOGUI_SHARED) && !defined(GLAD_GLAPI_EXPORT)
-        #define GLAD_GLAPI_EXPORT
-    #endif
-
     #include <glad/glad.h>
 #else
     #if defined(__APPLE__)

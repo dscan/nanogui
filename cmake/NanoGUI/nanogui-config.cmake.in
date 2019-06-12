@@ -1,0 +1,29 @@
+@PACKAGE_INIT@
+
+# The HEAD commit of the NanoGUI that was installed.
+set(nanogui_REVISION "@NANOGUI_REVISION@")
+
+# Find any external dependencies.  Find any external packages that were used in
+# the build before including the NanoGUI targets.
+include(CMakeFindDependencyMacro)
+
+# If NANOGUI_EXTERNAL_EIGEN resulted in finding an external Eigen, re-find it.
+if (NOT @NANOGUI_VENDOR_EIGEN@)  # NANOGUI_VENDOR_EIGEN
+  find_dependency(Eigen3 CONFIG)
+endif()
+
+# If NANOGUI_EXTERNAL_GLAD resulted in finding an external GLAD, re-find it.
+if (NOT @NANOGUI_VENDOR_GLAD@)  # NANOGUI_VENDOR_GLAD
+  find_dependency(glad CONFIG)
+endif()
+
+# If NANOGUI_EXTERNAL_GLFW resulted in finding an external GLFW, re-find it.
+if (NOT @NANOGUI_VENDOR_GLFW@)  # NANOGUI_VENDOR_GLFW
+  find_dependency(glfw3 CONFIG)
+endif()
+
+# Gather threads dependency (not REQUIRED).
+find_package(Threads QUIET)
+
+# Include the targets and verify we have all the dependencies we need.
+include(${CMAKE_CURRENT_LIST_DIR}/nanogui-targets.cmake)

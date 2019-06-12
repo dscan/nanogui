@@ -1,0 +1,43 @@
+# Only trigger builds for master.
+trigger:
+  branches:
+    include:
+      - master
+
+# Trigger pull request builds against master.
+pr:
+  autoCancel: true
+  branches:
+    include:
+      - master
+
+variables:
+  ubuntu_packages: 'libglu1-mesa-dev libxxf86vm-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libx11-dev'
+
+# Build specification
+jobs:
+  - job: External_Packaging_Linux
+    pool:
+      vmImage: ubuntu-16.04
+    steps:
+      - script: sudo apt-get install -y --no-install-recommends $(ubuntu_packages)
+      - template: .ci/templates/external_packaging.yml
+  - job: External_Packaging_MacOS_HighSierra
+    pool:
+      vmImage: macOS-10.13
+    steps:
+      - template: .ci/templates/external_packaging.yml
+  - job: External_Packaging_MacOS_Mojave
+    pool:
+      vmImage: macOS-10.14
+    steps:
+      - template: .ci/templates/external_packaging.yml
+  - job: External_Packaging_Win64
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+      - template: .ci/templates/external_packaging.yml
+        parameters:
+          generator: 'Visual Studio 15 2017'
+          extra_args: '-A x64'
+          vcvarsall: 'call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64'
