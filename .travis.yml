@@ -53,7 +53,7 @@ matrix:
     # Test that external packages are found as expected and consumed correctly
     # after installation.
     - os: linux
-      dist: xenial
+      dist: bionic
       language: cpp
       env: EXTERNAL_PACKAGING
       addons:
