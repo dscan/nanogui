@@ -182,7 +182,7 @@ if (MSVC)
       if (TARGET ${tgt})
         set_target_properties(${tgt}
           PROPERTIES
-            MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>>${msvc_dll}
+            MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>${msvc_dll}
         )
       endif()
     endforeach()
