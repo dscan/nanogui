@@ -172,6 +172,9 @@ if __name__ == "__main__":
         else:
             build_args.append("-j")
 
+    # Perform verbose builds on CI so we can see what flags are being passed.
+    # It seems CMake will do the right thing for ninja and MSVC generators too.
+    configure_args.append("-DCMAKE_VERBOSE_MAKEFILE=ON")
 
     # Build roots split for shared vs static to enable same CI job to build both
     # shared and static versions.

@@ -168,9 +168,8 @@ if (MSVC)
     target_compile_options(nanogui-private-interface INTERFACE /EHsc)
   endif()
 
-  # NOTE: root CMakeLists.txt sets CMP0091 to NEW, meaning /MD(d) and /MT(d) are
-  # selected automatically.  Users can override choices by setting
-  # CMAKE_MSVC_RUNTIME_LIBRARY explicitly.
+  # NOTE: search root CMakeLists.txt for CMP0091 for what happens when this
+  # policy is set.
   if (NOT POLICY CMP0091)
     # TODO: should these be in the private interface?
     if (BUILD_SHARED_LIBS)
