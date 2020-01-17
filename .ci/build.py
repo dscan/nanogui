@@ -70,7 +70,7 @@ def install_dependencies(build_root: Path, configure_args: List[str],
     eigen_build_dir = build_root / "eigen"
     rm_rf(eigen_build_dir)
     with cd(eigen_build_dir, create=True):
-        cmake(str(eigen_src_dir), *configure_args)
+        cmake(str(eigen_src_dir), *configure_args, "-DBUILD_TESTING=OFF")
         cmake("--build", ".", *build_args, "--target", "install")
 
     # Install GLFW dependency.

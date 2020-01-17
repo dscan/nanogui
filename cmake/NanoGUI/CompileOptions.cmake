@@ -168,25 +168,11 @@ if (MSVC)
     target_compile_options(nanogui-private-interface INTERFACE /EHsc)
   endif()
 
-  # NOTE: CMake 3.15 introduces MSVC_RUNTIME_LIBRARY.  Use the property when available.
-  # Cannot set MSVC_RUNTIME_LIBRARY property on interface libraries.
-  if (POLICY CMP0091)
-    if (BUILD_SHARED_LIBS)
-      # Compiles with /MD, or /MDd (debug)
-      set(msvc_dll "DLL")
-    else()
-      # Compiles with /MT, or /MTd (debug)
-      set(msvc_dll "")
-    endif()
-    foreach (tgt nanogui nanogui-obj nanogui-python nanogui-python-obj)
-      if (TARGET ${tgt})
-        set_target_properties(${tgt}
-          PROPERTIES
-            MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>:Debug>${msvc_dll}
-        )
-      endif()
-    endforeach()
-  else()
+  # NOTE: root CMakeLists.txt sets CMP0091 to NEW, meaning /MD(d) and /MT(d) are
+  # selected automatically.  Users can override choices by setting
+  # CMAKE_MSVC_RUNTIME_LIBRARY explicitly.
+  if (NOT POLICY CMP0091)
+    # TODO: should these be in the private interface?
     if (BUILD_SHARED_LIBS)
       target_compile_options(nanogui-interface INTERFACE /MD$<$<CONFIG:Debug>:d>)
     else()
