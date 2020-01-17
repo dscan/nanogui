@@ -180,7 +180,7 @@ if (MSVC)
     endif()
     foreach (tgt nanogui nanogui-obj nanogui-python nanogui-python-obj)
       if (TARGET ${tgt})
-        set_target_properties(nanogui-interface
+        set_target_properties(${tgt}
           PROPERTIES
             MSVC_RUNTIME_LIBRARY MultiThreaded$<$<CONFIG:Debug>>${msvc_dll}
         )
