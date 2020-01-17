@@ -77,9 +77,7 @@ matrix:
         - |
           python .ci/build.py --shared --install build -- \
               -DNANOGUI_DEV=ON \
-              -DNANOGUI_PYTHON_VERSION=3.5 \
-              -DPYTHON_INCLUDE_DIRS:PATH=/usr/include/python3.5m \
-              -DPYTHON_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpython3.5m.so
+              -DNANOGUI_PYTHON_VERSION=3.6
         - python .ci/build.py --shared test_package
     # # Run tests against the latest cmake version.  These are performed via a
     # # minimal parent project since most new policy updates are only detected
