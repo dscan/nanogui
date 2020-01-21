@@ -42,22 +42,22 @@ matrix:
               -DNANOGUI_DEV=ON \
               -DNANOGUI_PYTHON_VERSION=3.6
         - python .ci/build.py --shared test_package
-      - env: DEV_CHECK
-        install:
-          - python3 -m venv venv
-          - source venv/bin/activate
-          - pip install cmake==3.13.3 ninja Pygments ci-exec
-          - cmake --version
-        script:
-          # TODO: incomplete, needs to be parent/child test to actually catch
-          #       upcoming policy changes with -Werror=dev.
-          - |
-            python .ci/build.py --shared build -- \
-              -DNANOGUI_DEV=ON \
-              -DNANOGUI_PYTHON_VERSION=3.6 \
-              -Werror=dev
-          - |
-            python .ci/build.py --static build -- \
-              -DNANOGUI_DEV=ON \
-              -DNANOGUI_PYTHON_VERSION=3.6 \
-              -Werror=dev
+    - env: DEV_CHECK
+      install:
+        - python3 -m venv venv
+        - source venv/bin/activate
+        - pip install cmake==3.13.3 ninja Pygments ci-exec
+        - cmake --version
+      script:
+        # TODO: incomplete, needs to be parent/child test to actually catch
+        #       upcoming policy changes with -Werror=dev.
+        - |
+          python .ci/build.py --shared build -- \
+            -DNANOGUI_DEV=ON \
+            -DNANOGUI_PYTHON_VERSION=3.6 \
+            -Werror=dev
+        - |
+          python .ci/build.py --static build -- \
+            -DNANOGUI_DEV=ON \
+            -DNANOGUI_PYTHON_VERSION=3.6 \
+            -Werror=dev
