@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13.3 FATAL_ERROR)
 
 # CMake 3.15 introduces MSVC_RUNTIME_LIBRARY target property.
 # Must be done before `project` call.  See:

@@ -159,6 +159,9 @@ if __name__ == "__main__":
             "is to use in preparation for `test_package` stage."
         )
     )
+    # TODO: parent/child test
+    # TODO: cmake_minimum_required(VERSION ${CMAKE_VERSION} FATAL_ERROR) in
+    #       parent (???) to catch upcoming policy changes.
 
     args = parser.parse_args()
     configure_args = args.cmake_configure_args

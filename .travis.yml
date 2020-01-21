@@ -1,5 +1,20 @@
-language: cpp
 sudo: false
+os: linux
+dist: bionic
+language: cpp
+addons:
+  apt:
+    packages:
+      - libglu1-mesa-dev
+      - libxxf86vm-dev
+      - libxrandr-dev
+      - libxinerama-dev
+      - libxcursor-dev
+      - libxi-dev
+      - libx11-dev
+      - python3-dev
+      - python3-venv
+
 
 # Only build master branch, other branches will have a Pull Request build.
 branches:
@@ -9,65 +24,13 @@ branches:
 matrix:
   include:
     # - os: linux
-    #   dist: trusty
-    #   compiler: gcc-4.8
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #         - deadsnakes
-    #       packages:
-    #         - python3.5
-    #         - python3.5-dev
-    #         - python3.5-venv
-    #         - libglu1-mesa-dev
-    #         - libxxf86vm-dev
-    #         - libxrandr-dev
-    #         - libxinerama-dev
-    #         - libxcursor-dev
-    #         - libxi-dev
-    #         - libx11-dev
-    #   install:
-    #     - python3.5 -m venv venv
-    #     - source venv/bin/activate
-    #     - pip install cmake==3.7.2
-    #   script:
-    #     - cmake --version
-    #     - cmake -DNANOGUI_USE_GLAD=ON -DNANOGUI_PYTHON_VERSION=3.5 -DPYTHON_INCLUDE_DIRS:PATH=/usr/include/python3.5m -DPYTHON_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpython3.5m.so -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
-    #     - make -j 4
-    # - os: osx
-    #   compiler: clang
-    #   install:
-    #     - python3 -m venv venv
-    #     - source venv/bin/activate
-    #     - pip install cmake==3.7.2
-    #   script:
-    #     - cmake --version
-    #     - cmake -DNANOGUI_PYTHON_VERSION=2.7
-    #     - make -j 4
-    # - os: linux
     #   language: docs
     #   env: STYLE
     #   script:
     #     - resources/check-style.sh
     # Test that external packages are found as expected and consumed correctly
     # after installation.
-    - os: linux
-      dist: bionic
-      language: cpp
-      env: EXTERNAL_PACKAGING
-      addons:
-        apt:
-          packages:
-            - libglu1-mesa-dev
-            - libxxf86vm-dev
-            - libxrandr-dev
-            - libxinerama-dev
-            - libxcursor-dev
-            - libxi-dev
-            - libx11-dev
-            - python3-dev
-            - python3-venv
+    - env: EXTERNAL_PACKAGING
       install:
         # Use venv to conveniently install latest cmake and ninja.
         - python3 -m venv venv
@@ -79,57 +42,22 @@ matrix:
               -DNANOGUI_DEV=ON \
               -DNANOGUI_PYTHON_VERSION=3.6
         - python .ci/build.py --shared test_package
-    # # Run tests against the latest cmake version.  These are performed via a
-    # # minimal parent project since most new policy updates are only detected
-    # # when using `add_subdirectory`.
-    # - os: linux
-    #   dist: xenial
-    #   language: cpp
-    #   env: LATEST_CMAKE
-    #   addons:
-    #     apt:
-    #       packages:
-    #         - libglu1-mesa-dev
-    #         - libxxf86vm-dev
-    #         - libxrandr-dev
-    #         - libxinerama-dev
-    #         - libxcursor-dev
-    #         - libxi-dev
-    #         - libx11-dev
-    #         - python3-venv
-    #   install:
-    #     # Manufacture a parent build directory setup.
-    #     - cd .. && mkdir -p parent/third_party && mv nanogui parent/third_party && cd parent
-    #     - python3 -m venv venv
-    #     - source venv/bin/activate
-    #     - pip install cmake ninja
-    #   script:
-    #     # Manufacture the parent CMakeLists.txt
-    #     - |
-    #       python -c 'print("""
-    #       # The point of this test is to always run with latest CMake version,
-    #       # this is the only reason ${CMAKE_VERSION} is acceptable here!
-    #       cmake_minimum_required(VERSION ${CMAKE_VERSION} FATAL_ERROR)
-    #       project(nanogui-parent LANGUAGES CXX)
-
-    #       # Build this version with C++14
-    #       set(CMAKE_CXX_STANDARD 14)
-    #       set(CMAKE_CXX_STANDARD_REQUIRED ON)
-    #       set(CMAKE_CXX_EXTENSIONS OFF)
-
-    #       # Build a C++ project using NanoGUI.
-    #       set(NANOGUI_BUILD_PYTHON OFF)
-    #       set(NANOGUI_BUILD_EXAMPLE OFF)
-    #       add_subdirectory(third_party/nanogui)
-
-    #       # Reuse existing example code and link against NanoGUI
-    #       add_executable(example1 third_party/nanogui/src/example1.cpp)
-    #       target_link_libraries(example1 PRIVATE nanogui ${NANOGUI_EXTRA_LIBS})
-    #       target_include_directories(example1 PRIVATE third_party/nanogui/include ${NANOGUI_EXTRA_INCS})
-    #       target_compile_definitions(example1 PRIVATE ${NANOGUI_EXTRA_DEFS})
-    #       """)' > CMakeLists.txt
-    #     - mkdir build && cd build
-    #     - cmake --version
-    #     # This is the real goal of the test: -Werror=dev
-    #     - cmake -Werror=dev -G Ninja -DCMAKE_BUILD_TYPE=Release ..
-    #     - ninja -j 4
+      - env: DEV_CHECK
+        install:
+          - python3 -m venv venv
+          - source venv/bin/activate
+          - pip install cmake==3.13.3 ninja Pygments ci-exec
+          - cmake --version
+        script:
+          # TODO: incomplete, needs to be parent/child test to actually catch
+          #       upcoming policy changes with -Werror=dev.
+          - |
+            python .ci/build.py --shared build -- \
+              -DNANOGUI_DEV=ON \
+              -DNANOGUI_PYTHON_VERSION=3.6 \
+              -Werror=dev
+          - |
+            python .ci/build.py --static build -- \
+              -DNANOGUI_DEV=ON \
+              -DNANOGUI_PYTHON_VERSION=3.6 \
+              -Werror=dev
