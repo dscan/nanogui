@@ -37,7 +37,7 @@ add_custom_command(
 )
 
 # Add the output files to nanogui object library.
-nanogui_target_sources(nanogui-obj
+target_sources(nanogui-obj PRIVATE
   ${nanogui_bin2c_header}
   ${nanogui_bin2c_source}
 )
@@ -117,7 +117,6 @@ else()
   endforeach()
 
   # Last but not least, make the main libraries consume the objects.
-  # NOTE: don't use `nanogui_target_sources`!
   target_sources(nanogui PRIVATE $<TARGET_OBJECTS:nanogui-obj>)
   target_sources(nanogui-python PRIVATE $<TARGET_OBJECTS:nanogui-python-obj>)
 endif()

@@ -20,7 +20,7 @@ if (NANOGUI_BUILD_PYTHON)
       PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/ext/coro>
     )
-    nanogui_target_sources(nanogui-python-obj
+    target_sources(nanogui-python-obj PRIVATE
       ext/coro/coro.h
       ext/coro/coro.c
     )
@@ -103,7 +103,7 @@ if (NANOGUI_USE_GLAD)
     endif()
   else()
     # GLAD is bundled into NanoGUI unconditionally.
-    nanogui_target_sources(nanogui-obj
+    target_sources(nanogui-obj PRIVATE
       ext/glad/src/glad.c
       ext/glad/include/glad/glad.h
       ext/glad/include/KHR/khrplatform.h
@@ -177,7 +177,6 @@ else()
   # We exclude from all and then consume $<TARGET_OBJECTS> meaning the main glfw
   # library will not actually be built.
   add_subdirectory(ext/glfw ext_build/glfw EXCLUDE_FROM_ALL)
-  # NOTE: don't use `nanogui_target_sources`!
   target_sources(nanogui PRIVATE $<TARGET_OBJECTS:glfw_objects>)
 
   target_include_directories(nanogui-interface
@@ -204,7 +203,7 @@ endif()
 # NanoVG Antialiased 2D vector drawing library.                                #
 ################################################################################
 # Merge NanoVG into the NanoGUI library.
-nanogui_target_sources(nanogui-obj
+target_sources(nanogui-obj PRIVATE
   ext/nanovg/src/fontstash.h
   ext/nanovg/src/nanovg.h
   ext/nanovg/src/nanovg_gl.h
@@ -301,7 +300,7 @@ if (WIN32)
   set(nanogui_core_libs opengl32)
 elseif (APPLE)
   set(nanogui_core_libs Cocoa OpenGL CoreVideo IOKit)
-  nanogui_target_sources(nanogui-obj src/darwin.mm)
+  target_sources(nanogui-obj PRIVATE src/darwin.mm)
 elseif (CMAKE_SYSTEM MATCHES "Linux" OR CMAKE_SYSTEM_NAME MATCHES "BSD")
   set(nanogui_core_libs GL Xxf86vm Xrandr Xinerama Xcursor Xi X11)
 endif()

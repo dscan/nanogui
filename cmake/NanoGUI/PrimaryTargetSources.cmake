@@ -1,33 +1,5 @@
-# NOTE: please refer to the excellent article by Craig Scott explaining why this
-# nanogui_target_sources is used.  See "Supporting CMake 3.12 And Earlier":
-#
-# https://crascit.com/2016/01/31/enhanced-source-file-handling-with-target_sources/
-#
-# NanoGUI makes additional assumptions to simplify the function:
-# - No generator expressions allowed!
-# - No absolute paths allowed (NanoGUI convention).
-# - NanoGUI only uses PRIVATE sources.  Each ${ARGN} is assumed to be a file.
-function(nanogui_target_sources tgt)
-  # NOTE: use a function so that the policy scope is only relevant locally.
-  if (POLICY CMP0076)
-    cmake_policy(PUSH)
-    cmake_policy(SET CMP0076 NEW)
-    target_sources(${tgt} PRIVATE ${ARGN})
-    cmake_policy(POP)
-    return()
-  endif()
-
-  # NOTE: this file is being `include`ed from the top-level NanoGUI
-  # CMakeLists.txt, which is why we can prefix CMAKE_CURRENT_SOURCE_DIR.
-  set(nanogui_sources)
-  foreach(src ${ARGN})
-    list(APPEND nanogui_sources "${CMAKE_CURRENT_SOURCE_DIR}/${src}")
-  endforeach()
-  target_sources(${tgt} PRIVATE ${nanogui_sources})
-endfunction()
-
 # Main NanoGUI library
-nanogui_target_sources(nanogui-obj
+target_sources(nanogui-obj PRIVATE
   # The core header files.
   include/nanogui/button.h
   include/nanogui/checkbox.h
@@ -96,7 +68,7 @@ nanogui_target_sources(nanogui-obj
 
 # Python library
 if (NANOGUI_BUILD_PYTHON)
-  nanogui_target_sources(nanogui-python-obj
+  target_sources(nanogui-python-obj PRIVATE
     python/main.cpp
     python/constants_glfw.cpp
     python/constants_entypo.cpp

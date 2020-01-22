@@ -201,7 +201,6 @@ foreach (tgt nanogui-interface nanogui nanogui-obj nanogui-python nanogui-python
 endforeach()
 
 # Set platform independent target_sources nanogui-obj and nanogui-python-obj.
-# Defines `nanogui_target_sources` used in {Internal,External}Dependencies.
 include(NanoGUI/PrimaryTargetSources)
 
 # Create dependencies between the various targets (e.g., link nanogui with interface).
