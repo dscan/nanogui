@@ -168,15 +168,11 @@ if (MSVC)
     target_compile_options(nanogui-private-interface INTERFACE /EHsc)
   endif()
 
-  # NOTE: search root CMakeLists.txt for CMP0091 for what happens when this
-  # policy is set.
-  if (NOT POLICY CMP0091)
-    # TODO: should these be in the private interface?
-    if (BUILD_SHARED_LIBS)
-      target_compile_options(nanogui-interface INTERFACE /MD$<$<CONFIG:Debug>:d>)
-    else()
-      target_compile_options(nanogui-interface INTERFACE /MT$<$<CONFIG:Debug>:d>)
-    endif()
+  # CMP0091: MSVC_RUNTIME_LIBRARY is MultiThreaded$<$<CONFIG:Debug>:Debug>DLL
+  # which translates to "compile with /MD[d]" by default.  Prior to CMP0091, we
+  # scan for /MT[d].  If not found, add /MD[d].
+  if (NOT POLICY CMP0091 AND NOT CMAKE_CXX_FLAGS MATCHES /MT)
+    target_compile_options(nanogui-private-interface INTERFACE /MD$<$<CONFIG:Debug>:d>)
   endif()
 endif()
 

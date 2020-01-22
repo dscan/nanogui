@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.13.3 FATAL_ERROR)
 # CMake 3.15 introduces MSVC_RUNTIME_LIBRARY target property.
 # Must be done before `project` call.  See:
 # https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
+#
+# Prior to 3.15, /MD[d] added for MSVC *unless* /MT[d] found in CMAKE_CXX_FLAGS.
 if (POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
@@ -163,22 +165,6 @@ macro(check_cxx_compiler_and_linker_flags result cxx_flags linker_flags)
   set(CMAKE_REQUIRED_FLAGS "")
   set(CMAKE_REQUIRED_LIBRARIES "")
 endmacro()
-
-# Do not override user-specified runtime selection.  CMake defaults to using
-# MultiThreaded$<$<CONFIG:Debug>:Debug>DLL for both shared and static.  The
-# below selects /MD for shared, and /MT for static.
-#
-# This must be set before the targets below are created.  When CMP0091 does not
-# exist (CMake <3.15), the /MT(d) /MD(d) flags are handled in
-# cmake/CompileOptions.cmake instead.
-if (POLICY CMP0091)
-  if (NOT CMAKE_MSVC_RUNTIME_LIBRARY)
-    set(
-      CMAKE_MSVC_RUNTIME_LIBRARY
-      MultiThreaded$<$<CONFIG:Debug>:Debug>$<$<BOOL:${BUILD_SHARED_LIBS}>:DLL>
-    )
-  endif()
-endif()
 
 ################################################################################
 # Main target setup.                                                           #
