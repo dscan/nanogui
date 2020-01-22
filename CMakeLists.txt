@@ -11,18 +11,6 @@ endif()
 
 project("NanoGUI" VERSION 0.1.0 LANGUAGES C CXX)
 
-# CMake 3.13+ allow easier control of child project options:
-# https://cmake.org/cmake/help/latest/policy/CMP0077.html
-if (POLICY CMP0077)
-  cmake_policy(SET CMP0077 NEW)
-endif()
-
-# CMake 3.9+ introduces INTERPROCEDURAL_OPTIMIZATION, which we adhere to when
-# available to the build system executing this file.
-if (POLICY CMP0069)
-  cmake_policy(SET CMP0069 NEW)
-endif()
-
 ################################################################################
 # NanoGUI options.                                                             #
 ################################################################################

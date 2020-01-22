@@ -39,78 +39,24 @@ if (BUILD_SHARED_LIBS)
     endif()
   endforeach()
 
-  # Add IPO (link time optimization) compile / link flags for Release,
-  # MinSizeRel, and RelWithDebInfo builds.
+  # Add IPO (link time optimization) for Release-like builds.
   # NOTE: CheckIPOSupported added in 3.9, Intel support in 3.12, MSVC in 3.13.
-  # To reduce complexity of the logic involved here, we only use
-  # CheckIPOSupported for 3.13+.  Otherwise, manually test flags.
-  if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT nanogui_has_ipo OUTPUT nanogui_ipo_error)
-    if (nanogui_has_ipo)
-      message(STATUS "NanoGUI: IPO support enabled.")
-      foreach (tgt nanogui nanogui-obj nanogui-python nanogui-python-obj)
-        if (TARGET ${tgt})
-          set_target_properties(${tgt}
-            PROPERTIES
-              INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
-              INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON
-              INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON
-          )
-        endif()
-      endforeach()
-    else()
-      message(STATUS "NanoGUI: IPO not supported. ${nanogui_ipo_error}")
-    endif()
-  else()
-    if (MSVC)
-      message(STATUS "NanoGUI: IPO support enabled.")
-      target_compile_options(nanogui-private-interface
-        INTERFACE
-          $<$<CONFIG:Release>:/GL>
-          $<$<CONFIG:MinSizeRel>:/GL>
-          $<$<CONFIG:RelWithDebInfo>:/GL>
-      )
-      target_link_options(nanogui-private-interface
-        INTERFACE
-          $<$<CONFIG:Release>:/LTCG>
-          $<$<CONFIG:MinSizeRel>:/LTCG>
-          $<$<CONFIG:RelWithDebInfo>:/LTCG>
-      )
-    else()
-      if (NOT CMAKE_CXX_FLAGS MATCHES "-flto")
-        if (CMAKE_CXX_COMPILER_ID MATCHES Clang)
-          set(ipo_cxx_flags "-flto=thin")
-          set(ipo_linker_flags "-flto=thin")
-        else()
-          set(ipo_cxx_flags "-flto -fno-fat-lto-objects")
-          set(ipo_linker_flags "-flto")
-        endif()
-        check_cxx_compiler_and_linker_flags(
-          nanogui_has_ipo "${ipo_cxx_flags}" "${ipo_linker_flags}"
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT nanogui_has_ipo OUTPUT nanogui_ipo_error)
+  if (nanogui_has_ipo)
+    message(STATUS "NanoGUI: IPO support enabled.")
+    foreach (tgt nanogui nanogui-obj nanogui-python nanogui-python-obj)
+      if (TARGET ${tgt})
+        set_target_properties(${tgt}
+          PROPERTIES
+            INTERPROCEDURAL_OPTIMIZATION_RELEASE ON
+            INTERPROCEDURAL_OPTIMIZATION_MINSIZEREL ON
+            INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON
         )
-        if (nanogui_has_ipo)
-          message(STATUS "NanoGUI: IPO support enabled.")
-          # Generator expressions need a list to expand as separate arguments.
-          string(REPLACE " " ";" ipo_cxx_flags "${ipo_cxx_flags}")
-          string(REPLACE " " ";" ipo_linker_flags "${ipo_linker_flags}")
-          target_compile_options(nanogui-private-interface
-            INTERFACE
-              $<$<CONFIG:Release>:${ipo_cxx_flags}>
-              $<$<CONFIG:MinSizeRel>:${ipo_cxx_flags}>
-              $<$<CONFIG:RelWithDebInfo>:${ipo_cxx_flags}>
-          )
-          target_link_options(nanogui-private-interface
-            INTERFACE
-              $<$<CONFIG:Release>:${ipo_linker_flags}>
-              $<$<CONFIG:MinSizeRel>:${ipo_linker_flags}>
-              $<$<CONFIG:RelWithDebInfo>:${ipo_linker_flags}>
-          )
-        else()
-          message(STATUS "NanoGUI: IPO not supported.")
-        endif()
       endif()
-    endif()
+    endforeach()
+  else()
+    message(STATUS "NanoGUI: IPO not supported. ${nanogui_ipo_error}")
   endif()
 endif()
 
