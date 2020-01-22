@@ -72,53 +72,19 @@ endif()
 ################################################################################
 # Coordinate dependencies between nanogui targets.                             #
 ################################################################################
-# CMake 3.12+ has better support for object libraries.
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.12)
-  # Setup includes / compile definitions for compiling the object files.
-  foreach (tgt nanogui-obj nanogui-python-obj)
-    if (TARGET ${tgt})
-      target_link_libraries(${tgt} PUBLIC nanogui-interface)
-      target_link_libraries(${tgt} PRIVATE nanogui-private-interface)
-    endif()
-  endforeach()
-
-  # Linking against an object library will propagate usage requirements as well
-  # as consume the objects.
-  target_link_libraries(nanogui PUBLIC nanogui-obj)
-  if (NANOGUI_BUILD_PYTHON)
-    target_link_libraries(nanogui-python PUBLIC nanogui-python-obj)
+# Setup includes / compile definitions for compiling the object files.
+foreach (tgt nanogui-obj nanogui-python-obj)
+  if (TARGET ${tgt})
+    target_link_libraries(${tgt} PUBLIC nanogui-interface)
+    target_link_libraries(${tgt} PRIVATE nanogui-private-interface)
   endif()
-else()
-  # Prior to 3.12, object libraries cannot be used in target_link_libraries, so
-  # we need to set things for both the "real" libs as well as object libs.
-  foreach (tgt nanogui nanogui-python)
-    if (TARGET ${tgt})
-      target_link_libraries(${tgt} PUBLIC nanogui-interface)
-      target_link_libraries(${tgt} PRIVATE nanogui-private-interface)
-    endif()
-  endforeach()
+endforeach()
 
-  # Main libs have the correct usage requirements.  Now set them for object libs.
-  foreach (tgt nanogui-obj nanogui-python-obj)
-    if (TARGET ${tgt})
-      target_include_directories(${tgt}
-        PUBLIC
-          $<TARGET_PROPERTY:nanogui-interface,INTERFACE_INCLUDE_DIRECTORIES>
-        PRIVATE
-          $<TARGET_PROPERTY:nanogui-private-interface,INTERFACE_INCLUDE_DIRECTORIES>
-      )
-      target_compile_definitions(${tgt}
-        PUBLIC
-          $<TARGET_PROPERTY:nanogui-interface,INTERFACE_COMPILE_DEFINITIONS>
-        PRIVATE
-          $<TARGET_PROPERTY:nanogui-private-interface,INTERFACE_COMPILE_DEFINITIONS>
-      )
-    endif()
-  endforeach()
-
-  # Last but not least, make the main libraries consume the objects.
-  target_sources(nanogui PRIVATE $<TARGET_OBJECTS:nanogui-obj>)
-  target_sources(nanogui-python PRIVATE $<TARGET_OBJECTS:nanogui-python-obj>)
+# Linking against an object library will propagate usage requirements as well
+# as consume the objects (CMake 3.12+).
+target_link_libraries(nanogui PUBLIC nanogui-obj)
+if (NANOGUI_BUILD_PYTHON)
+  target_link_libraries(nanogui-python PUBLIC nanogui-python-obj)
 endif()
 
 # NanoGUI python bindings link against the main lib.
