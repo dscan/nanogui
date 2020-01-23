@@ -11,7 +11,7 @@ steps:
     inputs:
       versionSpec: '3.7'
   - script: |
-      pip install cmake ninja Pygments ci-exec
+      pip install cmake==3.13.0 ninja Pygments ci-exec
       cmake --version
       ninja --version
     displayName: Install Build Utilities
