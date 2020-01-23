@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 # CMake 3.15 introduces MSVC_RUNTIME_LIBRARY target property.
 # Must be done before `project` call.  See:
 # https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
-#
-# Prior to 3.15, /MD[d] added for MSVC *unless* /MT[d] found in CMAKE_CXX_FLAGS.
 if (POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
@@ -37,6 +35,8 @@ option(NANOGUI_STBI_IMPLEMENTATION "Bundle stb_image definitions in NanoGUI (STB
 option(NANOGUI_USE_LIBCXX "With Clang, link against libc++ / libc++abi?" ON)
 option(NANOGUI_INSTALL "Install NanoGUI on `make install`?" ${NANOGUI_CHILD_DEFAULT})
 option(NANOGUI_INSTALL_RPATH "Use full RPATH handling when installing?" ON)
+
+# See top of cmake/Developer.cmake.  This is *not* for parent projects / install.
 option(NANOGUI_DEV "Add NanoGUI dev flags (warnings on, warnings=error) and targets?" OFF)
 mark_as_advanced(NANOGUI_DEV)
 
