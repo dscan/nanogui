@@ -84,19 +84,6 @@ def install_dependencies(build_root: Path, configure_args: List[str],
             "-DGLFW_BUILD_DOCS=OFF",
             "-DGLFW_INSTALL=ON"
         ]
-        # NOTE: https://github.com/glfw/glfw/issues/528
-        # This breaks any consuming library wanting to properly support these.
-        # See also:
-        # https://github.com/glfw/glfw/blob/2c7ef5b480d7780455deed43aedc177b9fe3ac61/CMakeLists.txt#L84
-        if platform.system() == "Windows":
-            static = any("BUILD_SHARED_LIBS=OFF" in c for c in configure_args)
-            glfw_configure_args.extend([
-                f"-DUSE_MSVC_RUNTIME_LIBRARY_DLL={'OFF' if static else 'ON'}",
-                f"-DCMAKE_C_FLAGS_RELEASE=\"{'/MT' if static else '/MD'}\"",
-                f"-DCMAKE_C_FLAGS_MINSIZEREL=\"{'/MT' if static else '/MD'}\"",
-                f"-DCMAKE_C_FLAGS_RELWITHDEBINFO=\"{'/MTd' if static else '/MDd'}\"",
-                f"-DCMAKE_C_FLAGS_DEBUG=\"{'/MTd' if static else '/MDd'}\"",
-            ])
         cmake(str(glfw_src_dir), *configure_args, *glfw_configure_args)
         cmake("--build", ".", *build_args, "--target", "install")
 
