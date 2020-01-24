@@ -1,0 +1,30 @@
+parameters:
+  # In order to support Ninja // cl.exe, we must call vcvarsall.bat.  This must
+  # be done in _each_ `script` tag.  So the default value is the empty string
+  # to do nothing on *nix.  Parent visual studio callers would set it to e.g.
+  #     vcvarsall: 'call "<path>vcvarsall.bat" x64'
+  vcvarsall: ''
+  # Must be either shared or static.
+  lib_type: "shared"
+  # CMake Generator to use.
+  generator: "Ninja"
+  # Extra args for build tool, e.g. -A x64 for Visual Studio generators.
+  extra_args: ''
+  # NOT a parameter!  AzP doesn't allow `variables` in a template.  Don't override!
+  cmake_args: "-DNANOGUI_DEV=ON -DNANOGUI_EXTERNAL_EIGEN=ON -DNANOGUI_EXTERNAL_GLFW=ON -DNANOGUI_EXTERNAL_GLAD=ON"
+
+# NOTE: unfortunately, since it will either be bash or cmd, long lines are
+# required since line continuation characters are different :S
+steps:
+  - script: |
+      ${{ parameters.vcvarsall }}
+      python -u .ci/build.py -G "${{ parameters.generator }}" ${{ parameters.extra_args }} --${{ parameters.lib_type }} install_dependencies
+    displayName: Install External Dependencies (${{ parameters.lib_type }})
+  - script: |
+      ${{ parameters.vcvarsall }}
+      python -u .ci/build.py -G "${{ parameters.generator }}" ${{ parameters.extra_args }} --${{ parameters.lib_type }} --install build -- ${{ parameters.cmake_args }}
+    displayName: Build / Install NanoGUI (${{ parameters.lib_type }})
+  - script: |
+      ${{ parameters.vcvarsall }}
+      python -u .ci/build.py -G "${{ parameters.generator }}" ${{ parameters.extra_args }} --${{ parameters.lib_type }} test_package
+    displayName: Test NanoGUI Packaging (${{ parameters.lib_type }})

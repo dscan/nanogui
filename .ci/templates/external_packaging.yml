@@ -1,0 +1,29 @@
+parameters:
+  # Pass-through parameters.  See external_packaging_helper.yml.
+  vcvarsall: ''
+  generator: "Ninja"
+  extra_args: ''
+
+steps:
+  - checkout: self
+    submodules: recursive
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+  - script: |
+      pip install cmake==3.13.0 ninja Pygments ci-exec
+      cmake --version
+      ninja --version
+    displayName: Install Build Utilities
+  - template: ./external_packaging_helper.yml
+    parameters:
+      lib_type: shared
+      vcvarsall: ${{ parameters.vcvarsall }}
+      generator: ${{ parameters.generator }}
+      extra_args: ${{ parameters.extra_args }}
+  - template: ./external_packaging_helper.yml
+    parameters:
+      lib_type: static
+      vcvarsall: ${{ parameters.vcvarsall }}
+      generator: ${{ parameters.generator }}
+      extra_args: ${{ parameters.extra_args }}
