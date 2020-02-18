@@ -1,0 +1,32 @@
+parameters:
+  # Pass-through parameters.
+  # cmake_version := 'latest' => pip install cmake
+  # otherwise:                => pip install cmake==${{ parameters.cmake_version }}
+  cmake_version: 3.13.0
+  python_version: 3.7
+  generator: 'Ninja'
+
+steps:
+  - checkout: self
+    submodules: recursive
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '${{ parameters.python_version }}'
+  - script: |
+      pip install cmake
+      cmake --version
+    condition: eq('${{ parameters.cmake_version }}', 'latest')
+    displayName: Install CMake Latest
+  - script: |
+      pip install cmake==${{ parameters.cmake_version }}
+      cmake --version
+    condition: not(eq('${{ parameters.cmake_version }}', 'latest'))
+    displayName: Install CMake ${{parameters.cmake_version }}
+  - script: |
+      pip install ninja
+      ninja --version
+    condition: eq('${{ parameters.generator }}', 'Ninja')
+    displayName: Install Ninja
+  - script: |
+      pip install Pygments ci-exec
+    displayName: Install Build Utilities

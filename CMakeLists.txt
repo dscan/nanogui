@@ -1,13 +1,13 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
-project(nanogui)
+# CMake 3.15 introduces MSVC_RUNTIME_LIBRARY target property.
+# Must be done before `project` call.  See:
+# https://cmake.org/cmake/help/latest/prop_tgt/MSVC_RUNTIME_LIBRARY.html
+if (POLICY CMP0091)
+  cmake_policy(SET CMP0091 NEW)
+endif()
 
-if (POLICY CMP0058)
-  cmake_policy(SET CMP0058 NEW) # Ninja requires custom command byproducts to be explicit.
-endif()
-if (POLICY CMP0068)
-  cmake_policy(SET CMP0068 NEW) # RPATH settings on macOS don't affect install_name.
-endif()
+project(nanogui VERSION 1.0.0.0 LANGUAGES C CXX)
 
 if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "

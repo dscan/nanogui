@@ -1,0 +1,27 @@
+parameters:
+  # Pass-through parameters to build_setup.yml.
+  cmake_version: 3.13.0
+  python_version: 3.7
+  # Pass-through parameters.  See external_packaging_helper.yml.
+  vcvarsall: ''
+  generator: "Ninja"
+  extra_args: ''
+
+steps:
+  - template: ./build_setup.yml
+    parameters:
+      cmake_version: ${{ parameters.cmake_version }}
+      generator: ${{ parameters.generator }}
+      python_version: ${{ parameters.python_version }}
+  - template: ./external_packaging_helper.yml
+    parameters:
+      lib_type: shared
+      vcvarsall: ${{ parameters.vcvarsall }}
+      generator: ${{ parameters.generator }}
+      extra_args: ${{ parameters.extra_args }}
+  - template: ./external_packaging_helper.yml
+    parameters:
+      lib_type: static
+      vcvarsall: ${{ parameters.vcvarsall }}
+      generator: ${{ parameters.generator }}
+      extra_args: ${{ parameters.extra_args }}
