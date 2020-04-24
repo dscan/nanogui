@@ -9,6 +9,11 @@ endif()
 
 project(nanogui VERSION 1.0.0.0 LANGUAGES C CXX)
 
+# Make the nanogui custom cmake files available.
+list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(NanoGUI/Deprecated)
+
 if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "
     "You probably did not clone the project with --recursive. It is possible to recover "
