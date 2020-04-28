@@ -7,12 +7,29 @@ if (POLICY CMP0091)
   cmake_policy(SET CMP0091 NEW)
 endif()
 
+# TODO: bikeshed over versioning scheme.
+#       Proposal: major.minor.patch.tweak,
+#       - If tweak == 0: official release
+#       - Introduce and a commit that sets to 0, tag as release.
+#       - Immediately introduce a version bump commit.
+#
+#       Example: we start at 1.0.0.0 after this merges, tag it officially.
+#       Then add a new commit setting version to 1.0.1.1 and keep developing.
+#       Some time later (side-proposal: twice annually, after SIGGRAPH stuff),
+#       we release 1.0.1.0.
+#
+#       Problem is that nanogui_VERSION would be greater for dev release than
+#       official release.  Tried to basically treat tweak number as .dev in python.
 project(nanogui VERSION 1.0.0.0 LANGUAGES C CXX)
 
 # Make the nanogui custom cmake files available.
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-include(nanogui/deprecated)
+# NOTE: beware with `include`, directory scope is not changed.  CMAKE_CURRENT_SOURCE_DIR
+#       refers to nanogui root CMakeLists.txt.  Use CMAKE_CURRENT_LIST_FILE if needed.
+include(nanogui/build_type) # Set CMAKE_BUILD_TYPE for single config generators.
+include(nanogui/deprecated) # Deprecate previous nanogui CMake interface.
+include(nanogui/options)    # Setup all project options.
 
 if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
   message(FATAL_ERROR "The NanoGUI dependency repositories (GLFW, etc.) are missing! "
@@ -20,71 +37,11 @@ if (NOT IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/ext/glfw/src")
     "by calling \"git submodule update --init --recursive\"")
 endif()
 
-if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Release' as none was specified.")
-  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
-    "MinSizeRel" "RelWithDebInfo")
-endif()
-string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 
-set(NANOGUI_MASTER_PROJECT OFF)
-if (${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
-  set(NANOGUI_MASTER_PROJECT ON)
-endif()
 
-if (WIN32)
-  set(NANOGUI_BUILD_GLAD_DEFAULT ON)
-else()
-  set(NANOGUI_BUILD_GLAD_DEFAULT OFF)
-endif()
 
-set(NANOGUI_BUILD_SHARED_DEFAULT ON)
-set(NANOGUI_BUILD_PYTHON_DEFAULT ON)
-set(NANOGUI_BUILD_GLFW_DEFAULT ON)
 
-if (CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
-  set(CMAKE_CXX_COMPILER_ID "Emscripten")
-  set(NANOGUI_BUILD_SHARED_DEFAULT OFF)
-  set(NANOGUI_BUILD_PYTHON_DEFAULT OFF)
-  set(NANOGUI_BUILD_GLAD_DEFAULT   OFF)
-  set(NANOGUI_BUILD_GLFW_DEFAULT   OFF)
 
-  set(CMAKE_STATIC_LIBRARY_SUFFIX ".bc")
-  set(CMAKE_EXECUTABLE_SUFFIX ".bc")
-  set(CMAKE_CXX_CREATE_STATIC_LIBRARY "<CMAKE_CXX_COMPILER> -o <TARGET> <LINK_FLAGS> <OBJECTS>")
-  if (U_CMAKE_BUILD_TYPE MATCHES REL)
-    add_compile_options(-O3 -DNDEBUG)
-  endif()
-endif()
-
-option(NANOGUI_BUILD_EXAMPLES            "Build NanoGUI example application?" ON)
-option(NANOGUI_BUILD_SHARED              "Build NanoGUI as a shared library?" ${NANOGUI_BUILD_SHARED_DEFAULT})
-option(NANOGUI_BUILD_PYTHON              "Build a Python plugin for NanoGUI?" ${NANOGUI_BUILD_PYTHON_DEFAULT})
-option(NANOGUI_BUILD_GLAD                "Build GLAD OpenGL loader library? (needed on Windows)" ${NANOGUI_BUILD_GLAD_DEFAULT})
-option(NANOGUI_BUILD_GLFW                "Build GLFW?" ${NANOGUI_BUILD_GLFW_DEFAULT})
-option(NANOGUI_INSTALL                   "Install NanoGUI on `make install`?" ON)
-
-if (NOT NANOGUI_BACKEND)
-  if (CMAKE_SYSTEM_PROCESSOR MATCHES "armv7" OR
-      CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64" OR
-      CMAKE_CXX_COMPILER MATCHES "/em\\+\\+(-[a-zA-Z0-9.])?$")
-    set(NANOGUI_BACKEND_DEFAULT "GLES 2")
-  elseif (APPLE)
-    set(NANOGUI_BACKEND_DEFAULT "Metal")
-  else()
-    set(NANOGUI_BACKEND_DEFAULT "OpenGL")
-  endif()
-
-  set(NANOGUI_BACKEND ${NANOGUI_BACKEND_DEFAULT} CACHE STRING "Choose the backend used for rendering (OpenGL/GLES 2/GLES 3/Metal)" FORCE)
-endif()
-
-set_property(CACHE NANOGUI_BACKEND PROPERTY STRINGS "OpenGL" "GLES 2" "GLES 3" "Metal")
-
-# Allow overriding the pybind11 library used to compile NanoGUI
-set(NANOGUI_PYBIND11_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11"
-  CACHE STRING "Path containing the 'pybind11' library used to compile nanogui.")
-mark_as_advanced(NANOGUI_PYBIND11_DIR)
 
 if (NANOGUI_BUILD_PYTHON)
   # Try to autodetect Python (can be overridden manually if needed)

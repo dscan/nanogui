@@ -4,7 +4,6 @@
 #
 # Use SEND_ERROR to fail, but allow configuration to continue.  In this manner consumers
 # making the switch should be notified of all required updates.
-
 # Deprecated options.
 if (DEFINED NANOGUI_BUILD_SHARED)
   message(SEND_ERROR "NANOGUI_BUILD_SHARED is no longer an option.  Configure with "
