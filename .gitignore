@@ -1,6 +1,7 @@
 *.exe
 *.lib
 *.cmake
+!cmake/nanogui/*.cmake
 .DS_Store
 ext_build
 nanogui_resources.*
@@ -33,6 +34,12 @@ libnanogui.bc
 libnanogui.dylib
 *.metallib
 .vscode/
+
+# CI installs things in .ci/ folder
+.ci/**
+!.ci/build.py
+!.ci/**.yml
+
 # html documentation specific
 *.pyc
 docs/_build

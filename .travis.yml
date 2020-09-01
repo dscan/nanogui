@@ -1,6 +1,20 @@
-language: cpp
-dist: trusty
 sudo: false
+os: linux
+dist: bionic
+language: cpp
+addons:
+  apt:
+    packages:
+      - libglu1-mesa-dev
+      - libxxf86vm-dev
+      - libxrandr-dev
+      - libxinerama-dev
+      - libxcursor-dev
+      - libxi-dev
+      - libx11-dev
+      - python3-dev
+      - python3-venv
+
 
 # Only build master branch, other branches will have a Pull Request build.
 branches:
@@ -9,39 +23,41 @@ branches:
 
 matrix:
   include:
-    - os: linux
-      compiler: gcc-4.8
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - deadsnakes
-            - kubuntu-backports
-          packages:
-            - g++-4.8
-            - python3.5
-            - python3.5-dev
-            - python3.5-venv
-            - libglu1-mesa-dev
-            - libxxf86vm-dev
-            - libxrandr-dev
-            - libxinerama-dev
-            - libxcursor-dev
-            - libxi-dev
-            - libx11-dev
-            - cmake
+    # - os: linux
+    #   language: docs
+    #   env: STYLE
+    #   script:
+    #     - resources/check-style.sh
+    # Test that external packages are found as expected and consumed correctly
+    # after installation.
+    - env: EXTERNAL_PACKAGING
+      install:
+        # Use venv to conveniently install latest cmake and ninja.
+        - python3 -m venv venv
+        - source venv/bin/activate
+        - pip install cmake ninja Pygments ci-exec
       script:
-        - cmake --version
-        - cmake -DNANOGUI_USE_GLAD=ON -DNANOGUI_PYTHON_VERSION=3.5 -DPYTHON_INCLUDE_DIRS:PATH=/usr/include/python3.5m -DPYTHON_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpython3.5m.so -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
-        - make -j 2
-    - os: osx
-      compiler: clang
-      script:
-        - cmake --version
-        - cmake -DNANOGUI_PYTHON_VERSION=2.7
-        - make -j 2
-    - os: linux
-      language: docs
-      env: STYLE
-      script:
-      - resources/check-style.sh
+        - |
+          python .ci/build.py --shared --install build -- \
+              -DNANOGUI_DEV=ON \
+              -DNANOGUI_PYTHON_VERSION=3.6
+        - python .ci/build.py --shared test_package
+    # - env: DEV_CHECK
+    #   install:
+    #     - python3 -m venv venv
+    #     - source venv/bin/activate
+    #     - pip install cmake==3.13.3 ninja Pygments ci-exec
+    #     - cmake --version
+    #   script:
+    #     # TODO: incomplete, needs to be parent/child test to actually catch
+    #     #       upcoming policy changes with -Werror=dev.
+    #     - |
+    #       python .ci/build.py --shared build -- \
+    #         -DNANOGUI_DEV=ON \
+    #         -DNANOGUI_PYTHON_VERSION=3.6 \
+    #         -Werror=dev
+    #     - |
+    #       python .ci/build.py --static build -- \
+    #         -DNANOGUI_DEV=ON \
+    #         -DNANOGUI_PYTHON_VERSION=3.6 \
+    #         -Werror=dev
